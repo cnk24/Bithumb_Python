@@ -11,7 +11,6 @@ class CSocketClient:
 
     def connect(self):
         try:
-            self.client.bind(('127.0.0.1', 0))
             self.client.connect((self.SERVER_ADDRESS, self.PORT))
         except Exception as ex:
             print('Connect Error :', ex)
@@ -19,8 +18,6 @@ class CSocketClient:
     def send(self, msg):
         try:
             self.client.send(msg.encode())
-            #sbuff = bytes(msg, encoding='utf-8')
-            #self.client.send(sbuff)
         except Exception as ex:
             print('Send Error :', ex)
 
