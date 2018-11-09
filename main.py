@@ -1,6 +1,5 @@
 import sys
-import threading
-from PyQt5.QtWidgets import QApplication
+from PyQt5 import QtWidgets
 from MainWindow import CWindow
 from SocketClient import CSocketClient
 from bithumb import Cbithumb
@@ -8,7 +7,7 @@ from bithumb import Cbithumb
 
 def main():
 
-    bithumb = Cbithumb()
+    #bithumb = Cbithumb()
 
     #ticker = bithumb.getTicker(0)
     #price = bithumb.getCurrentPrice(ticker)
@@ -24,6 +23,18 @@ def main():
     #for k, v in prices.items():
     #    print(k, v)
 
+    
+
+    #tickers = bithumb.getTickers()
+    #for ticker in tickers:
+    #    bull = bithumb.bull_market(ticker, 10)
+    #    if bull:
+    #        print("{} 상승".format(ticker))
+    #    else:
+    #        print("{} 하락".format(ticker))
+
+    
+
 
 
     #client = CSocketClient()
@@ -33,14 +44,15 @@ def main():
 
 
 
-    app = QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     w = CWindow()
+    w.show()
 
-    prices = bithumb.getCurrentPriceAll()
-    w.setTickerList(prices)
+    #prices = bithumb.getCurrentPriceAll()
+    #w.setTickerList(prices)
 
-    w.debugLog('LOG')
-    w.communicationLog('TEST', True)
+    #w.debugLog("LOG")
+    #w.communicationLog('TEST', True)
 
     app.exec_()
     #sys.exit(app.exec())
