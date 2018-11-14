@@ -13,12 +13,15 @@ class Cbithumb:
 
     # 과거 데이터 얻기
     def getBeforeData(self, ticker):
-        time = strftime("%Y-%m-%d", localtime())
+        try:
+            time = strftime("%Y-%m-%d", localtime())
 
-        # 일별데이터 이므로 마지막 업데이트 day 와 현재의 day 비교
-        if self.lastDay != time:
-            self.lastDay = time
-            self.oldData = pybithumb.get_ohlcv(ticker)
+            # 일별데이터 이므로 마지막 업데이트 day 와 현재의 day 비교
+            if self.lastDay != time:
+                self.lastDay = time
+                self.oldData = pybithumb.get_ohlcv(ticker)
+        except Exception as ex:
+            print('Error :', ex)
 
         return self.oldData
 
@@ -36,22 +39,33 @@ class Cbithumb:
 
     # 종목의 현재가 가져오기
     def getCurrentPrice(self, ticker):
-        price = pybithumb.get_current_price(ticker)
+        try:
+            price = pybithumb.get_current_price(ticker)
+        except Exception as ex:
+            print('Error :', ex)
+
         return price
 
     # 모든 종목의 현재가 가져오기
     def getCurrentPriceAll(self):
-        prices = dict()
-        all = pybithumb.get_current_price('ALL')
-        for ticker in self.tickers:
-            newDict = {ticker: all[ticker]['closing_price']}
-            prices.update(newDict)
+        try:
+            prices = dict()
+            all = pybithumb.get_current_price('ALL')
+            for ticker in self.tickers:
+                newDict = {ticker: all[ticker]['closing_price']}
+                prices.update(newDict)
+        except Exception as ex:
+            print('Error :', ex)
 
         return prices
 
     # 종목의 호가정보 가져오기
     def getOrderBook(self, ticker):
-        orderbook = pybithumb.get_orderbook(ticker)
+        try:
+            orderbook = pybithumb.get_orderbook(ticker)
+        except Exception as ex:
+            print('Error :', ex)
+
         return orderbook
 
     # 이동 평균 구하기

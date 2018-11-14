@@ -4,24 +4,26 @@ from PyQt5 import QtCore
 from time import localtime, strftime
 from bithumb import Cbithumb
 
+xbithumb = Cbithumb()
+
 class Worker(QtCore.QThread):
     finished = QtCore.pyqtSignal(dict)
-    bithumb = Cbithumb()
 
     def run(self):
         while True:
             data = {}
 
-            for ticker in self.bithumb.getTickers():
-                data[ticker] = self.getMarketInfos(ticker, 5)
+            prices = xbithumb.getCurrentPriceAll()
+            for ticker in xbithumb.getTickers():
+                price = float(prices[ticker])
+                data[ticker] = self.getMarketInfos(ticker, price, 5)
 
             self.finished.emit(data)
             self.msleep(500)
 
-    def getMarketInfos(self, ticker, day):
+    def getMarketInfos(self, ticker, price, day):
         try:
-            ma = self.bithumb.CalMovingAverage(ticker, day)
-            price = self.bithumb.getCurrentPrice(ticker)
+            ma = xbithumb.CalMovingAverage(ticker, day)
             last_ma = ma[-2]
 
             state = None
@@ -36,20 +38,19 @@ class Worker(QtCore.QThread):
 
 
 class CWindow(QtWidgets.QWidget):
-    bithumb = Cbithumb()
 
     def __init__(self):
         super().__init__()
         uic.loadUi("MainForm.ui", self)
 
         self.viewMarketInfo.setColumnCount(4)
-        self.viewMarketInfo.setRowCount(self.bithumb.getTickersLength())
+        self.viewMarketInfo.setRowCount(xbithumb.getTickersLength())
         self.viewMarketInfo.setHorizontalHeaderLabels(["Name", "Price", "이동평균", "State"])
         self.viewMarketInfo.resizeColumnsToContents()
 
         self.worker = Worker()
         self.worker.finished.connect(self.updateMarketInfo)
-        self.worker.start()        
+        self.worker.start()
 
     def debugLog(self, msg):
         time = strftime("%Y-%m-%d %H:%M:%S", localtime())
@@ -75,12 +76,14 @@ class CWindow(QtWidgets.QWidget):
     def updateMarketInfo(self, data):
         try:
             for ticker, infos in data.items():
-                index = self.bithumb.getTickers().index(ticker)
+                index = xbithumb.getTickers().index(ticker)
  
                 self.viewMarketInfo.setItem(index, 0, QtWidgets.QTableWidgetItem(ticker))
                 self.viewMarketInfo.setItem(index, 1, QtWidgets.QTableWidgetItem(str(infos[0])))
                 self.viewMarketInfo.setItem(index, 2, QtWidgets.QTableWidgetItem(str(infos[1])))
                 self.viewMarketInfo.setItem(index, 3, QtWidgets.QTableWidgetItem(str(infos[2])))
+
+                self.viewMarketInfo.resizeColumnsToContents()
         except:
             pass
         

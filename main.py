@@ -3,6 +3,8 @@ from PyQt5 import QtWidgets
 from MainWindow import CWindow
 from SocketClient import CSocketClient
 
+#from bithumb import Cbithumb
+
 def main():
 
     #bithumb = Cbithumb()
@@ -20,18 +22,6 @@ def main():
     #prices = bithumb.getCurrentPriceAll()
     #for k, v in prices.items():
     #    print(k, v)
-
-    
-
-    #tickers = bithumb.getTickers()
-    #for ticker in tickers:
-    #    bull = bithumb.bull_market(ticker, 10)
-    #    if bull:
-    #        print("{} 상승".format(ticker))
-    #    else:
-    #        print("{} 하락".format(ticker))
-
-    
 
 
 
@@ -51,6 +41,7 @@ def main():
 
     #w.debugLog("LOG")
     #w.communicationLog('TEST', True)
+
 
     app.exec_()
     #sys.exit(app.exec())
