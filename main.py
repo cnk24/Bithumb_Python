@@ -2,8 +2,6 @@ import sys
 from PyQt5 import QtWidgets
 from MainWindow import CWindow
 from SocketClient import CSocketClient
-from bithumb import Cbithumb
-
 
 def main():
 

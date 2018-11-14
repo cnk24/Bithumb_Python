@@ -18,17 +18,17 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>231</width>
+     <width>271</width>
      <height>581</height>
     </rect>
    </property>
   </widget>
-  <widget class="QTableWidget" name="viewLogger">
+  <widget class="QListWidget" name="logWidget">
    <property name="geometry">
     <rect>
-     <x>250</x>
+     <x>290</x>
      <y>10</y>
-     <width>541</width>
+     <width>501</width>
      <height>581</height>
     </rect>
    </property>

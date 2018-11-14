@@ -56,9 +56,8 @@ class CWindow(QtWidgets.QWidget):
         log = "[{0}] {1}".format(time, msg)
 
         listWidget = QtWidgets.QListWidget(self)
-        listWidget = self.debugLog
+        listWidget = self.logWidget
         listWidget.addItem(QtWidgets.QListWidgetItem(log))
-        #listWidget.addItem(log)
 
     def communicationLog(self, msg, isRecv=False):
         time = strftime("%Y-%m-%d %H:%M:%S", localtime())
@@ -70,7 +69,7 @@ class CWindow(QtWidgets.QWidget):
             title = "Client-->Server"
 
         log = "[{0}] [{1}] {2}".format(time, title, msg)
-        #self.communicationLog.addItem(QtWidgets.QListWidgetItem(log))
+
 
     @QtCore.pyqtSlot(dict)
     def updateMarketInfo(self, data):

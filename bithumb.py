@@ -1,11 +1,26 @@
 import pybithumb
+from time import localtime, strftime
 
 class Cbithumb:
     tickers = []
 
+    lastDay = ""
+    oldData = []
+
     # init 모든 종목 가져오기
     def __init__(self):
         self.tickers = pybithumb.get_tickers()
+
+    # 과거 데이터 얻기
+    def getBeforeData(self, ticker):
+        time = strftime("%Y-%m-%d", localtime())
+
+        # 일별데이터 이므로 마지막 업데이트 day 와 현재의 day 비교
+        if self.lastDay != time:
+            self.lastDay = time
+            self.oldData = pybithumb.get_ohlcv(ticker)
+
+        return self.oldData
 
     # 전체 종목 이름 가져오기
     def getTickers(self):
@@ -38,11 +53,6 @@ class Cbithumb:
     def getOrderBook(self, ticker):
         orderbook = pybithumb.get_orderbook(ticker)
         return orderbook
-
-    # 과거 데이터 얻기
-    def getBeforeData(self, ticker):
-        data = pybithumb.get_ohlcv(ticker)
-        return data
 
     # 이동 평균 구하기
     def CalMovingAverage(self, ticker, day):
