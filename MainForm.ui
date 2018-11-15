@@ -36,13 +36,23 @@
   <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>290</x>
+     <x>750</x>
      <y>10</y>
-     <width>721</width>
+     <width>261</width>
      <height>431</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="layoutPlot"/>
+  </widget>
+  <widget class="QListWidget" name="listTarget">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>10</y>
+     <width>151</width>
+     <height>431</height>
+    </rect>
+   </property>
   </widget>
  </widget>
  <resources/>

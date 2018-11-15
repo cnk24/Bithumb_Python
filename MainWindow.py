@@ -4,8 +4,8 @@ from PyQt5 import QtCore
 from time import localtime, strftime
 from bithumb import Cbithumb
 
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+#import matplotlib.pyplot as plt
+#from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 
 
 xbithumb = Cbithumb()
@@ -49,6 +49,7 @@ class Worker(QtCore.QThread):
 
 
 class CWindow(QtWidgets.QWidget):
+    dicTarget = dict()
 
     def __init__(self):
         super().__init__()
@@ -59,40 +60,71 @@ class CWindow(QtWidgets.QWidget):
         self.viewMarketInfo.setHorizontalHeaderLabels(["Name", "Price", "이동평균", "State", "Target"])
         self.viewMarketInfo.resizeColumnsToContents()
 
-        self.initPlot()
+        #self.initPlot()
 
         self.worker = Worker()
         self.worker.finished.connect(self.updateMarketInfo)
         self.worker.start()
 
-    def initPlot(self):
-        self.fig = plt.Figure()
-        self.canvas = FigureCanvas(self.fig)
-        self.layoutPlot.addWidget(self.canvas)
+    #def initPlot(self):
+    #    self.fig = plt.Figure()
+    #    self.canvas = FigureCanvas(self.fig)
+    #    self.layoutPlot.addWidget(self.canvas)
 
-        self.ax1 = self.fig.add_subplot(1, 1, 1)
-        self.ax2 = self.ax1.twinx()
-        self.ax1.set_xlabel('Ticker')
-        self.ax1.set_ylabel('Target')
-        self.ax2.set_ylabel('Price')
-        self.ax1.yaxis.label.set_color('red')
-        self.ax2.yaxis.label.set_color('blue')
+    #    self.ax1 = self.fig.add_subplot(1, 1, 1)
+    #    self.ax2 = self.ax1.twinx()
+    #    self.ax1.set_xlabel('Ticker')
+    #    self.ax1.set_ylabel('Target')
+    #    self.ax2.set_ylabel('Price')
+    #    self.ax1.yaxis.label.set_color('red')
+    #    self.ax2.yaxis.label.set_color('blue')
 
-    def plotDraw(self):
-        x = xbithumb.getTickers()
-        prices = xbithumb.getCurrentPriceAll()
+    #def plotDraw(self):
+    #    x = xbithumb.getTickers()
+    #    prices = xbithumb.getCurrentPriceAll()
 
-        y1 = []
-        y2 = []
-        for ticker in x:
-            y1.append(xbithumb.CalTarget(ticker))
-            y2.append(float(prices[ticker]))
+    #    y1 = []
+    #    y2 = []
+    #    for ticker in x:
+    #        y1.append(xbithumb.CalTarget(ticker))
+    #        y2.append(float(prices[ticker]))
 
-        self.ax1.plot(x, y1, lw=0.5, color='r')
-        self.ax2.plot(x, y2, lw=0.5, color='b')
+    #    self.ax1.plot(x, y1, lw=0.5, color='r')
+    #    self.ax2.plot(x, y2, lw=0.5, color='b')
 
         #self.ax1.grid()
-        self.canvas.draw()
+    #    self.canvas.draw()
+
+
+
+    def TargetAdd(self, ticker, price):
+        newDict = {ticker: price}
+        self.dicTarget.update(newDict)
+
+        value = "[{0}] [{1}]".format(ticker, price)        
+
+        listWidget = QtWidgets.QListWidget(self)
+        listWidget = self.listTarget
+        listWidget.addItem(QtWidgets.QListWidgetItem(value))
+
+    def TargetRemove(self, ticker):
+        listWidget = QtWidgets.QListWidget(self)
+        listWidget = self.listTarget
+        listWidget.removeAll()
+
+        del self.dicTarget[ticker]
+
+        for item in self.dicTarget:
+            value = "[{0}] [{1}]".format(item.key, item.value)
+            listWidget.addItem(QtWidgets.QListWidgetItem(value))
+
+
+        #model = listWidget.model()
+        #for selectedItem in listWidget.selectedItems():
+        #    qIndex = listWidget.indexFromItem(selectedItem)
+            #print('removing : %s' %model.data(qIndex).toString())
+        #    model.removeRow(qIndex.row())
+
 
 
     def debugLog(self, msg):
@@ -120,12 +152,20 @@ class CWindow(QtWidgets.QWidget):
         try:
             for ticker, infos in data.items():
                 index = xbithumb.getTickers().index(ticker)
+
+                price = infos[0]
+                last_ma = infos[1]
+                state = infos[2]
+                target_state = infos[3]
+
+                if target_state == "On":
+                    self.TargetAdd(ticker, price)
  
                 self.viewMarketInfo.setItem(index, 0, QtWidgets.QTableWidgetItem(ticker))
-                self.viewMarketInfo.setItem(index, 1, QtWidgets.QTableWidgetItem(str(infos[0])))
-                self.viewMarketInfo.setItem(index, 2, QtWidgets.QTableWidgetItem(str(infos[1])))
-                self.viewMarketInfo.setItem(index, 3, QtWidgets.QTableWidgetItem(str(infos[2])))
-                self.viewMarketInfo.setItem(index, 4, QtWidgets.QTableWidgetItem(str(infos[3])))
+                self.viewMarketInfo.setItem(index, 1, QtWidgets.QTableWidgetItem(str(price)))
+                self.viewMarketInfo.setItem(index, 2, QtWidgets.QTableWidgetItem(str(last_ma)))
+                self.viewMarketInfo.setItem(index, 3, QtWidgets.QTableWidgetItem(str(state)))
+                self.viewMarketInfo.setItem(index, 4, QtWidgets.QTableWidgetItem(str(target_state)))
 
                 self.viewMarketInfo.resizeColumnsToContents()
 

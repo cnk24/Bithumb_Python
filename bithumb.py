@@ -81,9 +81,9 @@ class Cbithumb:
         df = self.getBeforeData(ticker)
         yesterday = df.iloc[-2]
  
-        today_open = yesterday['close']
-        yesterday_high = yesterday['high']
-        yesterday_low = yesterday['low']
+        today_open = float(yesterday['close'])
+        yesterday_high = float(yesterday['high'])
+        yesterday_low = float(yesterday['low'])
         target = today_open + (yesterday_high - yesterday_low) * 0.5
         return target
 
