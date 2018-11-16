@@ -172,8 +172,7 @@ class CWindow(QtWidgets.QWidget):
                 state = infos[2]
                 target_state = infos[3]
 
-                #if state == "상승장" & target_state == "On":
-                if target_state == "On":
+                if state == "상승장" & target_state == "On":
                     self.TargetAdd(ticker, price)
                 else:
                     self.TargetRemove(ticker)
