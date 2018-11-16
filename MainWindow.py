@@ -4,8 +4,8 @@ from PyQt5 import QtCore
 from time import localtime, strftime
 from bithumb import Cbithumb
 
-#import matplotlib.pyplot as plt
-#from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 
 
 xbithumb = Cbithumb()
@@ -20,7 +20,7 @@ class Worker(QtCore.QThread):
             prices = xbithumb.getCurrentPriceAll()
             for ticker in xbithumb.getTickers():
                 price = float(prices[ticker])
-                data[ticker] = self.getMarketInfos(ticker, price, 5)
+                data[ticker] = self.getMarketInfos(ticker, price, 7)
 
             self.finished.emit(data)
             self.msleep(500)
@@ -60,40 +60,47 @@ class CWindow(QtWidgets.QWidget):
         self.viewMarketInfo.setHorizontalHeaderLabels(["Name", "Price", "이동평균", "State", "Target"])
         self.viewMarketInfo.resizeColumnsToContents()
 
-        #self.initPlot()
+        self.initPlot()
 
         self.worker = Worker()
         self.worker.finished.connect(self.updateMarketInfo)
         self.worker.start()
 
-    #def initPlot(self):
-    #    self.fig = plt.Figure()
-    #    self.canvas = FigureCanvas(self.fig)
-    #    self.layoutPlot.addWidget(self.canvas)
+    def initPlot(self):
+        self.fig = plt.Figure()
+        self.canvas = FigureCanvas(self.fig)
+        self.layoutPlot.addWidget(self.canvas)
 
-    #    self.ax1 = self.fig.add_subplot(1, 1, 1)
-    #    self.ax2 = self.ax1.twinx()
-    #    self.ax1.set_xlabel('Ticker')
-    #    self.ax1.set_ylabel('Target')
-    #    self.ax2.set_ylabel('Price')
-    #    self.ax1.yaxis.label.set_color('red')
-    #    self.ax2.yaxis.label.set_color('blue')
+    def plotDraw(self, ticker):
+        df = xbithumb.getMACD(ticker)
 
-    #def plotDraw(self):
-    #    x = xbithumb.getTickers()
-    #    prices = xbithumb.getCurrentPriceAll()
 
-    #    y1 = []
-    #    y2 = []
-    #    for ticker in x:
-    #        y1.append(xbithumb.CalTarget(ticker))
-    #        y2.append(float(prices[ticker]))
+        #ax1 = self.fig.add_subplot(1, 1, 1)
+        #self.ax2 = self.ax1.twinx()
 
-    #    self.ax1.plot(x, y1, lw=0.5, color='r')
-    #    self.ax2.plot(x, y2, lw=0.5, color='b')
+        ax_macd = self.fig.add_subplot(211, frame_on=False)
+        ax_macd.set_title(ticker)
+        ax_macd.set_ylabel('MACD')
+        ax_macd.yaxis.label.set_color('blue')
+        ax_macd.plot(df.index.date, df['macd'], lw=0.5, color='blue')
 
-        #self.ax1.grid()
-    #    self.canvas.draw()
+        ax_signal = ax_macd.twinx()
+        ax_signal.set_ylabel('Signal')
+        ax_signal.yaxis.label.set_color('orange')
+        ax_signal.plot(df.index.date, df['macds'], lw=0.5, color='orange')
+
+        #ax_oscillator = ax_macd.twinx()
+        #ax_oscillator.set_ylabel('oscillator')
+        #ax_oscillator.yaxis.label.set_color('green')
+        #ax_oscillator.plot(df.index.date, df['macdo'], lw=0.5, color='green')
+
+
+        #ax_volume = self.fig.add_subplot(212, frame_on=False)
+        #ax_volume.set_ylabel('volume')
+        #ax_volume.yaxis.label.set_color('red')
+        #ax_volume.plot(df.index.date, df['volume'], lw=0.5, color='red')
+
+        self.canvas.draw()
 
 
 
@@ -172,7 +179,7 @@ class CWindow(QtWidgets.QWidget):
                 state = infos[2]
                 target_state = infos[3]
 
-                if state == "상승장" & target_state == "On":
+                if state == "상승장" and target_state == "On":
                     self.TargetAdd(ticker, price)
                 else:
                     self.TargetRemove(ticker)
@@ -185,7 +192,7 @@ class CWindow(QtWidgets.QWidget):
 
                 self.viewMarketInfo.resizeColumnsToContents()
 
-            #self.plotDraw()
+            self.plotDraw('XRP')
         except:
             pass
         
