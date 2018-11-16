@@ -97,7 +97,18 @@ class CWindow(QtWidgets.QWidget):
 
 
 
+    def TargetFind(self, ticker):
+        val = self.dicTarget.get(ticker)
+        if val is None:
+            return False
+
+        return True
+
+
     def TargetAdd(self, ticker, price):
+        if self.TargetFind(ticker) == True:
+            return
+
         newDict = {ticker: price}
         self.dicTarget.update(newDict)
 
@@ -108,6 +119,9 @@ class CWindow(QtWidgets.QWidget):
         listWidget.addItem(QtWidgets.QListWidgetItem(value))
 
     def TargetRemove(self, ticker):
+        if self.TargetFind(ticker) == False:
+            return
+
         listWidget = QtWidgets.QListWidget(self)
         listWidget = self.listTarget
         listWidget.removeAll()
@@ -154,12 +168,15 @@ class CWindow(QtWidgets.QWidget):
                 index = xbithumb.getTickers().index(ticker)
 
                 price = infos[0]
-                last_ma = infos[1]
+                last_ma = round(infos[1], 2)
                 state = infos[2]
                 target_state = infos[3]
 
+                #if state == "상승장" & target_state == "On":
                 if target_state == "On":
                     self.TargetAdd(ticker, price)
+                else:
+                    self.TargetRemove(ticker)
  
                 self.viewMarketInfo.setItem(index, 0, QtWidgets.QTableWidgetItem(ticker))
                 self.viewMarketInfo.setItem(index, 1, QtWidgets.QTableWidgetItem(str(price)))

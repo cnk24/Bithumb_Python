@@ -3,13 +3,14 @@ from time import localtime, strftime
 
 class Cbithumb:
     tickers = []
-
-    lastDay = ""
-    oldData = []
+    oldData = dict()
 
     # init 모든 종목 가져오기
     def __init__(self):
         self.tickers = pybithumb.get_tickers()
+        for ticker in self.tickers:
+            newDict = {ticker: None}
+            self.oldData.update(newDict)
 
     # 과거 데이터 얻기
     def getBeforeData(self, ticker):
@@ -17,11 +18,16 @@ class Cbithumb:
             time = strftime("%Y-%m-%d", localtime())
 
             # 일별데이터 이므로 마지막 업데이트 day 와 현재의 day 비교
-            if self.lastDay != time:
-                self.lastDay = time
-                self.oldData = pybithumb.get_ohlcv(ticker)
+            if self.oldData[ticker] is None:
+                self.oldData[ticker] = pybithumb.get_ohlcv(ticker)
+            else:
+                df = self.oldData[ticker]
+                timestamp = df.index[-1]
+                lastTime = timestamp.strftime("%Y-%m-%d")
+                if lastTime != time:
+                    self.oldData[ticker] = pybithumb.get_ohlcv(ticker)
             
-            return self.oldData
+            return self.oldData[ticker]
 
         except Exception as ex:
             print('Error :', ex)
