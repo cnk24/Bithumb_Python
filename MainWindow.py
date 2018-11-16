@@ -74,7 +74,6 @@ class CWindow(QtWidgets.QWidget):
     def plotDraw(self, ticker):
         df = xbithumb.getMACD(ticker)
 
-
         #ax1 = self.fig.add_subplot(1, 1, 1)
         #self.ax2 = self.ax1.twinx()
 
@@ -84,10 +83,10 @@ class CWindow(QtWidgets.QWidget):
         ax_macd.yaxis.label.set_color('blue')
         ax_macd.plot(df.index.date, df['macd'], lw=0.5, color='blue')
 
-        ax_signal = ax_macd.twinx()
-        ax_signal.set_ylabel('Signal')
-        ax_signal.yaxis.label.set_color('orange')
-        ax_signal.plot(df.index.date, df['macds'], lw=0.5, color='orange')
+        #ax_signal = ax_macd.twinx()
+        #ax_signal.set_ylabel('Signal')
+        #ax_signal.yaxis.label.set_color('orange')
+        #ax_signal.plot(df.index.date, df['macds'], lw=0.5, color='orange', kind='bar')
 
         #ax_oscillator = ax_macd.twinx()
         #ax_oscillator.set_ylabel('oscillator')
