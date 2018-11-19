@@ -74,15 +74,7 @@ class CWindow(QtWidgets.QWidget):
 
     def plotMACD(self, ticker):
         self.fig.clear()
-        df = xbithumb.getMACD(ticker)
-
-
-        #completed = 0
-        #while completed < 100:
-        #    completed += 0.0001
-        #    self.progressBar.setValue(completed)
-
-        
+        df = xbithumb.getMACD(ticker)        
 
         ax1 = self.fig.add_subplot(211, frame_on=False)
         ax1.set_title(ticker)
@@ -184,6 +176,13 @@ class CWindow(QtWidgets.QWidget):
     @QtCore.pyqtSlot(dict)
     def updateMarketInfo(self, data):
         try:
+
+            #completed = 0
+            #while completed < 100:
+            #    completed += 0.0001
+            #    self.progressBar.setValue(completed)
+
+
             for ticker, infos in data.items():
                 index = xbithumb.getTickers().index(ticker)
 
@@ -203,7 +202,7 @@ class CWindow(QtWidgets.QWidget):
                 self.viewMarketInfo.setItem(index, 3, QtWidgets.QTableWidgetItem(str(state)))
                 self.viewMarketInfo.setItem(index, 4, QtWidgets.QTableWidgetItem(str(target_state)))
 
-                self.viewMarketInfo.resizeColumnsToContents()
+                self.viewMarketInfo.resizeColumnsToContents()                
         except:
             pass
         
