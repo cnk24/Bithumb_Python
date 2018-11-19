@@ -146,26 +146,4 @@ class Cbithumb:
         df = df.assign(macd=macd, macds=macds, macdo=macdo).dropna()
         return df
 
-    # MACD 차트 그리기
-    #def plotMACD(self, ticker):
-    #    df = self.getMACD(ticker)
-
-    #    macd = go.Scatter(x=df.index.date, y=df['macd'], name="MACD")
-    #    signal = go.Scatter(x=df.index.date, y=df['macds'], name="Signal")
-    #    oscillator = go.Bar(x=df.index.date, y=df['macdo'], name="oscillator")
-    #    trade_volume = go.Bar(x=df.index.date, y=df['volume'], name="volume")
-
-    #    data = [macd, signal, oscillator]
-
-    #    layout = go.Layout(title='{} MACD 그래프'.format(ticker))
-    #    fig = tools.make_subplots(rows=2, cols=1, shared_xaxes=True)
-
-    #    for trace in data:
-    #        fig.append_trace(trace, 1, 1)
-
-    #    fig.append_trace(trade_volume, 2, 1)
-
-    #    offline.iplot(fig)
-
-
 

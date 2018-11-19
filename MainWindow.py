@@ -59,6 +59,7 @@ class CWindow(QtWidgets.QWidget):
         self.viewMarketInfo.setRowCount(xbithumb.getTickersLength())
         self.viewMarketInfo.setHorizontalHeaderLabels(["Name", "Price", "이동평균", "State", "Target"])
         self.viewMarketInfo.resizeColumnsToContents()
+        self.viewMarketInfo.cellClicked.connect(self.tableCellClicked)
 
         self.initPlot()
 
@@ -77,27 +78,30 @@ class CWindow(QtWidgets.QWidget):
         #ax1 = self.fig.add_subplot(1, 1, 1)
         #self.ax2 = self.ax1.twinx()
 
-        ax_macd = self.fig.add_subplot(211, frame_on=False)
-        ax_macd.set_title(ticker)
-        ax_macd.set_ylabel('MACD')
-        ax_macd.yaxis.label.set_color('blue')
-        ax_macd.plot(df.index.date, df['macd'], lw=0.5, color='blue')
+        ax1 = self.fig.add_subplot(211, frame_on=False)
+        ax1.set_title(ticker)
+        #ax_macd.set_ylabel('MACD')
+        #ax_macd.yaxis.label.set_color('blue')        
+        ax1.plot(df.index.date, df['macd'], lw=1.0, color='blue')
+        ax1.plot(df.index.date, df['macds'], lw=1.0, color='orange')
+        ax1.bar(df.index.date, df['macdo'], align='center', alpha=0.5, color='green')
+
 
         #ax_signal = ax_macd.twinx()
         #ax_signal.set_ylabel('Signal')
         #ax_signal.yaxis.label.set_color('orange')
-        #ax_signal.plot(df.index.date, df['macds'], lw=0.5, color='orange', kind='bar')
+        #ax_signal.plot(df.index.date, df['macds'], lw=0.5, color='orange')
 
-        #ax_oscillator = ax_macd.twinx()
-        #ax_oscillator.set_ylabel('oscillator')
-        #ax_oscillator.yaxis.label.set_color('green')
-        #ax_oscillator.plot(df.index.date, df['macdo'], lw=0.5, color='green')
+        
 
+        volumes = []
+        for val in df['volume']:
+            volumes.append(float(val))
 
-        #ax_volume = self.fig.add_subplot(212, frame_on=False)
-        #ax_volume.set_ylabel('volume')
-        #ax_volume.yaxis.label.set_color('red')
-        #ax_volume.plot(df.index.date, df['volume'], lw=0.5, color='red')
+        ax2 = self.fig.add_subplot(212, frame_on=False)
+        ax2.set_ylabel('volume')
+        ax2.yaxis.label.set_color('red')
+        ax2.plot(df.index.date, volumes, lw=0.5, color='red')
 
         self.canvas.draw()
 
@@ -139,13 +143,11 @@ class CWindow(QtWidgets.QWidget):
             listWidget.addItem(QtWidgets.QListWidgetItem(value))
 
 
-        #model = listWidget.model()
-        #for selectedItem in listWidget.selectedItems():
-        #    qIndex = listWidget.indexFromItem(selectedItem)
-            #print('removing : %s' %model.data(qIndex).toString())
-        #    model.removeRow(qIndex.row())
-
-
+    def tableCellClicked(self, row, column):
+        if column == 0:
+            item = self.viewMarketInfo.item(row, column)
+            ticker = item.text()
+            self.plotDraw(ticker)
 
     def debugLog(self, msg):
         time = strftime("%Y-%m-%d %H:%M:%S", localtime())
@@ -190,8 +192,6 @@ class CWindow(QtWidgets.QWidget):
                 self.viewMarketInfo.setItem(index, 4, QtWidgets.QTableWidgetItem(str(target_state)))
 
                 self.viewMarketInfo.resizeColumnsToContents()
-
-            self.plotDraw('XRP')
         except:
             pass
         
