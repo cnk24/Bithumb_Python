@@ -131,6 +131,10 @@ class Cbithumb:
     def getMACD(self, ticker, short=12, long=26, t=9):
         df = pd.DataFrame(self.getBeforeData(ticker))
 
+        # 데이터의 타입을 float형으로 바꿔줌
+        df[['close', 'open', 'high', 'low', 'volume']] \
+            = df[['close', 'open', 'high', 'low', 'volume']].astype(float)
+        
         # 단기(12) EMA(지수이동평균)
         ma_short = df.close.ewm(span=short).mean()
         # 장기(26) EMA(지수이동평균)
@@ -145,5 +149,30 @@ class Cbithumb:
 
         df = df.assign(macd=macd, macds=macds, macdo=macdo).dropna()
         return df
+
+    # 일자(n,m,t)에 따른 Stochastic(KDJ)의 값을 구하기 위해 함수형태로 만듬 
+    def getStochastic(self, ticker, n=15, m=5, t=3):
+        df = pd.DataFrame(self.getBeforeData(ticker))
+
+        # 데이터의 타입을 float형으로 바꿔줌
+        df[['close', 'open', 'high', 'low', 'volume']] \
+            = df[['close', 'open', 'high', 'low', 'volume']].astype(float)
+        
+        # n일중 최고가
+        ndays_high = df.high.rolling(window=n, min_periods=1).max()
+        # n일중 최저가
+        ndays_low = df.low.rolling(window=n, min_periods=1).min()
+    
+        # Fast%K 계산
+        kdj_k = ((df.close - ndays_low) / (ndays_high - ndays_low))*100
+        # Fast%D (=Slow%K) 계산
+        kdj_d = kdj_k.ewm(span=m).mean()
+        # Slow%D 계산
+        kdj_j = kdj_d.ewm(span=t).mean()
+    
+        # dataframe에 컬럼 추가
+        df = df.assign(kdj_k=kdj_k, kdj_d=kdj_d, kdj_j=kdj_j).dropna()        
+        return df
+
 
 

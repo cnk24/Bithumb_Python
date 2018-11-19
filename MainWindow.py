@@ -72,36 +72,44 @@ class CWindow(QtWidgets.QWidget):
         self.canvas = FigureCanvas(self.fig)
         self.layoutPlot.addWidget(self.canvas)
 
-    def plotDraw(self, ticker):
+    def plotMACD(self, ticker):
+        self.fig.clear()
         df = xbithumb.getMACD(ticker)
 
-        #ax1 = self.fig.add_subplot(1, 1, 1)
-        #self.ax2 = self.ax1.twinx()
 
-        ax1 = self.fig.add_subplot(211, frame_on=False)
-        ax1.set_title(ticker)
-        #ax_macd.set_ylabel('MACD')
-        #ax_macd.yaxis.label.set_color('blue')        
-        ax1.plot(df.index.date, df['macd'], lw=1.0, color='blue')
-        ax1.plot(df.index.date, df['macds'], lw=1.0, color='orange')
-        ax1.bar(df.index.date, df['macdo'], align='center', alpha=0.5, color='green')
-
-
-        #ax_signal = ax_macd.twinx()
-        #ax_signal.set_ylabel('Signal')
-        #ax_signal.yaxis.label.set_color('orange')
-        #ax_signal.plot(df.index.date, df['macds'], lw=0.5, color='orange')
+        #completed = 0
+        #while completed < 100:
+        #    completed += 0.0001
+        #    self.progressBar.setValue(completed)
 
         
 
-        volumes = []
-        for val in df['volume']:
-            volumes.append(float(val))
-
+        ax1 = self.fig.add_subplot(211, frame_on=False)
+        ax1.set_title(ticker)
+        ax1.plot(df.index.date, df['macd'], lw=1.0, color='blue', label='MACD')
+        ax1.plot(df.index.date, df['macds'], lw=1.0, color='orange', label='signal')
+        ax1.bar(df.index.date, df['macdo'], align='center', alpha=0.5, color='green', label='oscillator')
+        ax1.legend(loc='upper left')
+        
         ax2 = self.fig.add_subplot(212, frame_on=False)
-        ax2.set_ylabel('volume')
-        ax2.yaxis.label.set_color('red')
-        ax2.plot(df.index.date, volumes, lw=0.5, color='red')
+        ax2.bar(df.index.date, df['volume'], align='center', alpha=0.5, color='red', label='volume')
+        ax2.legend(loc='upper left')
+
+        self.canvas.draw()
+
+    def plotStochastic(self, ticker):
+        self.fig.clear()
+        df = xbithumb.getStochastic(ticker)
+
+        ax1 = self.fig.add_subplot(211, frame_on=False)
+        ax1.set_title(ticker)
+        ax1.plot(df.index.date, df['kdj_k'], lw=1.0, color='blue', label='Slow%K')
+        ax1.plot(df.index.date, df['kdj_d'], lw=1.0, color='orange', label='Slow%D')
+        ax1.legend(loc='upper left')
+        
+        ax2 = self.fig.add_subplot(212, frame_on=False)
+        ax2.bar(df.index.date, df['volume'], align='center', alpha=0.5, color='red', label='volume')
+        ax2.legend(loc='upper left')
 
         self.canvas.draw()
 
@@ -147,7 +155,11 @@ class CWindow(QtWidgets.QWidget):
         if column == 0:
             item = self.viewMarketInfo.item(row, column)
             ticker = item.text()
-            self.plotDraw(ticker)
+            self.plotMACD(ticker)
+        elif column == 1:
+            item = self.viewMarketInfo.item(row, 0)
+            ticker = item.text()
+            self.plotStochastic(ticker)
 
     def debugLog(self, msg):
         time = strftime("%Y-%m-%d %H:%M:%S", localtime())
