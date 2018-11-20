@@ -11,16 +11,23 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 xbithumb = Cbithumb()
 
 class Worker(QtCore.QThread):
-    finished = QtCore.pyqtSignal(dict)
+    # 사용자 정의 시그널 선언
+    finished = QtCore.pyqtSignal(dict)    
+    change_value = QtCore.pyqtSignal(int)
 
     def run(self):
         while True:
             data = {}
 
+            cnt = 0;
             prices = xbithumb.getCurrentPriceAll()
             for ticker in xbithumb.getTickers():
                 price = float(prices[ticker])
                 data[ticker] = self.getMarketInfos(ticker, price, 7)
+
+                cnt += 1
+                pos = (cnt / xbithumb.getTickersLength()) * 100
+                self.change_value.emit(pos)
 
             self.finished.emit(data)
             self.msleep(500)
@@ -64,6 +71,7 @@ class CWindow(QtWidgets.QWidget):
         self.initPlot()
 
         self.worker = Worker()
+        self.worker.change_value.connect(self.progressBar.setValue)
         self.worker.finished.connect(self.updateMarketInfo)
         self.worker.start()
 
@@ -173,16 +181,17 @@ class CWindow(QtWidgets.QWidget):
         log = "[{0}] [{1}] {2}".format(time, title, msg)
 
 
-    @QtCore.pyqtSlot(dict)
+
+    #@QtCore.pyqtSlot()
+    #def displayProgress(self, cnt):
+        #completed = 0
+        #while completed < 100:
+        #    completed += 0.0001
+        #    self.progressBar.setValue(completed)
+
+    @QtCore.pyqtSlot(dict)    
     def updateMarketInfo(self, data):
         try:
-
-            #completed = 0
-            #while completed < 100:
-            #    completed += 0.0001
-            #    self.progressBar.setValue(completed)
-
-
             for ticker, infos in data.items():
                 index = xbithumb.getTickers().index(ticker)
 
