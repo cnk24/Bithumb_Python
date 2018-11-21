@@ -17,7 +17,7 @@ def main():
     w = CWindow()
     w.show()
 
-    #w.debugLog("LOG")
+    w.debug("LOG")
     #w.communicationLog('TEST', True)
 
 

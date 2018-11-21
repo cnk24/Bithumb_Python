@@ -3,6 +3,7 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 from time import localtime, strftime
 from bithumb import Cbithumb
+from logger import MyLogger
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -61,6 +62,9 @@ class CWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         uic.loadUi("MainForm.ui", self)
+
+        self.logger = MyLogger()
+        self.logger.SetLogView(self.uiLog)
 
         self.viewMarketInfo.setColumnCount(5)
         self.viewMarketInfo.setRowCount(xbithumb.getTickersLength())
@@ -161,33 +165,18 @@ class CWindow(QtWidgets.QWidget):
             ticker = item.text()
             self.plotStochastic(ticker)
 
-    def debugLog(self, msg):
-        time = strftime("%Y-%m-%d %H:%M:%S", localtime())
-        log = "[{0}] {1}".format(time, msg)
+    def debug(self, msg):
+        self.logger.debug(msg)
 
-        listWidget = QtWidgets.QListWidget(self)
-        listWidget = self.logWidget
-        listWidget.addItem(QtWidgets.QListWidgetItem(log))
+    def error(self, msg):
+        self.logger.error(msg)
 
-    def communicationLog(self, msg, isRecv=False):
-        time = strftime("%Y-%m-%d %H:%M:%S", localtime())
+    def info(self, msg):
+        self.logger.info(msg)
 
-        title = ""
-        if isRecv == True:
-            title = "Client<--Server"
-        else:
-            title = "Client-->Server"
+    def warning(self, msg):
+        self.logger.warning(msg)
 
-        log = "[{0}] [{1}] {2}".format(time, title, msg)
-
-
-
-    #@QtCore.pyqtSlot()
-    #def displayProgress(self, cnt):
-        #completed = 0
-        #while completed < 100:
-        #    completed += 0.0001
-        #    self.progressBar.setValue(completed)
 
     @QtCore.pyqtSlot(dict)    
     def updateMarketInfo(self, data):
