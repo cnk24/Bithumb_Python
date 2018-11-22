@@ -2,40 +2,35 @@ from PyQt5 import uic
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 from time import localtime, strftime
-from bithumb import Cbithumb
 from logger import MyLogger
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 
 
-xbithumb = Cbithumb()
-
 class Worker(QtCore.QThread):
     # 사용자 정의 시그널 선언
-    finished = QtCore.pyqtSignal(dict)    
-    change_value = QtCore.pyqtSignal(int)
+    finished = QtCore.pyqtSignal(dict)
+
+    def __init__(self, bithumb):
+        super().__init__()
+        self.bithumb = bithumb
 
     def run(self):
         while True:
             data = {}
 
-            cnt = 0;
-            prices = xbithumb.getCurrentPriceAll()
-            for ticker in xbithumb.getTickers():
+            prices = self.bithumb.getCurrentPriceAll()
+            for ticker in self.bithumb.getTickers():
                 price = float(prices[ticker])
                 data[ticker] = self.getMarketInfos(ticker, price, 7)
-
-                cnt += 1
-                pos = (cnt / xbithumb.getTickersLength()) * 100
-                self.change_value.emit(pos)
 
             self.finished.emit(data)
             self.msleep(500)
 
     def getMarketInfos(self, ticker, price, day):
         try:
-            ma = xbithumb.CalMovingAverage(ticker, day)
+            ma = self.bithumb.CalMovingAverage(ticker, day)
             last_ma = ma[-2]
 
             state = None
@@ -45,7 +40,7 @@ class Worker(QtCore.QThread):
                 state = "하락장"
 
             target_state = None
-            target = xbithumb.CalTarget(ticker)
+            target = self.bithumb.CalTarget(ticker)
             if price > target:
                 target_state = "On"
             else:
@@ -59,25 +54,26 @@ class Worker(QtCore.QThread):
 class CWindow(QtWidgets.QWidget):
     dicTarget = dict()
 
-    def __init__(self):
+    def __init__(self, bithumb):
         super().__init__()
         uic.loadUi("MainForm.ui", self)
+
+        self.bithumb = bithumb
 
         self.logger = MyLogger()
         self.logger.SetLogView(self.uiLog)
 
         self.viewMarketInfo.setColumnCount(5)
-        self.viewMarketInfo.setRowCount(xbithumb.getTickersLength())
+        self.viewMarketInfo.setRowCount(bithumb.getTickersLength())
         self.viewMarketInfo.setHorizontalHeaderLabels(["Name", "Price", "이동평균", "State", "Target"])
         self.viewMarketInfo.resizeColumnsToContents()
         self.viewMarketInfo.cellClicked.connect(self.tableCellClicked)
 
         self.initPlot()
 
-        self.worker = Worker()
-        self.worker.change_value.connect(self.progressBar.setValue)
-        self.worker.finished.connect(self.updateMarketInfo)
-        self.worker.start()
+        worker = Worker(bithumb)
+        worker.finished.connect(self.updateMarketInfo)
+        worker.start()
 
     def initPlot(self):
         self.fig = plt.Figure()
@@ -86,7 +82,7 @@ class CWindow(QtWidgets.QWidget):
 
     def plotMACD(self, ticker):
         self.fig.clear()
-        df = xbithumb.getMACD(ticker)        
+        df = self.bithumb.getMACD(ticker)
 
         ax1 = self.fig.add_subplot(211, frame_on=False)
         ax1.set_title(ticker)
@@ -103,7 +99,7 @@ class CWindow(QtWidgets.QWidget):
 
     def plotStochastic(self, ticker):
         self.fig.clear()
-        df = xbithumb.getStochastic(ticker)
+        df = self.bithumb.getStochastic(ticker)
 
         ax1 = self.fig.add_subplot(211, frame_on=False)
         ax1.set_title(ticker)
@@ -182,7 +178,7 @@ class CWindow(QtWidgets.QWidget):
     def updateMarketInfo(self, data):
         try:
             for ticker, infos in data.items():
-                index = xbithumb.getTickers().index(ticker)
+                index = self.bithumb.getTickers().index(ticker)
 
                 price = infos[0]
                 last_ma = round(infos[1], 2)
