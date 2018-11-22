@@ -1,6 +1,6 @@
 import pybithumb
 import pandas as pd
-from time import localtime, strftime
+from datetime import datetime
 
 
 
@@ -37,7 +37,7 @@ class Cbithumb:
     # 과거 데이터 얻기
     def getBeforeData(self, ticker):
         try:
-            time = strftime("%Y-%m-%d", localtime())
+            time = datetime.today().strftime("%Y-%m-%d")
 
             # 일별데이터 이므로 마지막 업데이트 day 와 현재의 day 비교
             if self.oldData[ticker] is None:
