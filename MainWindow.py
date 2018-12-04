@@ -31,7 +31,7 @@ class Worker(QtCore.QThread):
     def getMarketInfos(self, ticker, price, day):
         try:
             ma = self.bithumb.CalMovingAverage(ticker, day)
-            last_ma = ma[-2]
+            last_ma = ma[-2] # 뒤에서 두번째
 
             state = None
             if price > last_ma:
